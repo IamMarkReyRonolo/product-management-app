@@ -1,24 +1,39 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("./utils/dbConnection");
+const models = require("./models");
 
 const app = express();
 
 // MIDDLEWARES
+app.use("/src/uploads", express.static("src/uploads"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // DB CONNECTION
+
 db.authenticate()
 	.then(() => {
-		console.log("Database connected");
+		db.sync({ alter: true }).then(() => {
+			console.log("Database is sync");
+			console.log("Database connected");
+		});
 	})
 	.catch((err) => {
 		console.log(err);
 	});
 
 // ROUTES
+const productAPI = require("./apis/productAPI");
+const accountAPI = require("./apis/accountAPI");
+const customerAPI = require("./apis/customerAPI");
+const profileAPI = require("./apis/profileAPI");
+
+app.use("/api/products", productAPI);
+app.use("/api", accountAPI);
+app.use("/api", customerAPI);
+app.use("/api", profileAPI);
 
 // ERROR HANDLING
 app.use((req, res, next) => {
