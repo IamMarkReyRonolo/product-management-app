@@ -8,7 +8,7 @@ const getAllProducts = (req, res, next) => {
 				error.status = 404;
 				next(error);
 			}
-			res.status(200).json({ count: result.length, data: { result } });
+			res.status(200).json({ count: result.length, products: { result } });
 		})
 		.catch((err) => {
 			next(err);
@@ -17,17 +17,15 @@ const getAllProducts = (req, res, next) => {
 
 const getSpecificProduct = async (req, res, next) => {
 	try {
-		const prod = await model.Product.findByPk(req.params.id);
-		if (!prod) {
+		const product = await model.Product.findByPk(req.params.id, {
+			include: model.Account,
+		});
+		if (!product) {
 			const error = new Error("Not found");
 			error.status = 404;
 			next(error);
 		}
-		const account = await prod.getAccounts();
-		res.status(200).json({
-			product: prod,
-			accounts: account,
-		});
+		res.status(200).json(product);
 	} catch (error) {
 		next(error);
 	}
@@ -94,8 +92,6 @@ const deleteProduct = async (req, res, next) => {
 						console.error(err);
 						return;
 					}
-
-					//file removed
 				});
 			})
 			.catch((err) => {
@@ -109,13 +105,13 @@ const deleteProduct = async (req, res, next) => {
 const deleteAllProduct = (req, res, next) => {
 	model.Product.destroy({ truncate: true })
 		.then((result) => {
-			if (!result) {
+			if (result) {
+				res.status(200).json({ message: "Successfully deleted all products" });
+			} else {
 				const error = new Error("Not Found");
 				error.status = 404;
 				next(error);
 			}
-
-			res.status(200).json({ message: "Successfully deleted all products" });
 		})
 		.catch((err) => {
 			next(err);

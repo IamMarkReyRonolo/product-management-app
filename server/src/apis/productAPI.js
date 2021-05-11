@@ -35,7 +35,6 @@ router.patch("/:id", upload.single("product_image"), productCtrl.updateProduct);
 
 // DELETE
 router.delete("/:id", productCtrl.deleteProduct);
-
 router.delete("/", productCtrl.deleteAllProduct);
 
 module.exports = router;
