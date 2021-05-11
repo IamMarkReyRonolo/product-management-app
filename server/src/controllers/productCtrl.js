@@ -31,20 +31,27 @@ const getSpecificProduct = async (req, res, next) => {
 	}
 };
 
-const addProduct = (req, res, next) => {
-	console.log(req.file);
-	model.Product.create({
-		product_name: req.body.product_name,
-		product_image: req.file.path,
-	})
-		.then((result) => {
-			res
-				.status(201)
-				.json({ message: "Successfully created product", product: result });
-		})
-		.catch((err) => {
-			next(err);
+const addProduct = async (req, res, next) => {
+	try {
+		const product = await model.Product.create({
+			product_name: req.body.product_name,
+			product_image: req.file.path,
 		});
+
+		const accounting = await model.Accounting.create({
+			totalExpenses: 0,
+			totalIncome: 0,
+			netIncome: 0,
+			productId: product.id,
+		});
+
+		res.status(201).json({
+			message: "Successfully created product",
+			result: { product, accounting },
+		});
+	} catch (error) {
+		next(error);
+	}
 };
 
 const updateProduct = (req, res, next) => {
@@ -69,9 +76,10 @@ const updateProduct = (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
 	try {
-		const data = await model.Product.findByPk(req.params.id, {
-			attributes: ["product_image"],
-		});
+		const data = await model.Product.findByPk(req.params.id);
+
+		// await data.removeAccounting();
+		// await data.removeAccounts();
 
 		model.Product.destroy({ where: { id: req.params.id } })
 			.then((result) => {

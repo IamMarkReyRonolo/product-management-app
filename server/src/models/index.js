@@ -52,15 +52,28 @@ const Profile = db.define(
 	{ timestamps: false, tableName: "profile" }
 );
 
-Product.hasMany(Account);
-Account.belongsTo(Product);
+const Accounting = db.define(
+	"accounting",
+	{
+		totalExpenses: DataTypes.FLOAT,
+		totalIncome: DataTypes.FLOAT,
+		netIncome: DataTypes.FLOAT,
+	},
+	{ tableName: "accounting" }
+);
 
-Account.belongsToMany(Customer, { through: Profile });
-Customer.belongsToMany(Account, { through: Profile });
+Product.hasMany(Account, { onDelete: "CASCADE" });
+Account.belongsTo(Product, { onDelete: "CASCADE" });
 
-Account.hasMany(Profile);
-Profile.belongsTo(Account);
-Customer.hasMany(Profile);
-Profile.belongsTo(Customer);
+Account.belongsToMany(Customer, { through: Profile }, { onDelete: "CASCADE" });
+Customer.belongsToMany(Account, { through: Profile }, { onDelete: "CASCADE" });
 
-module.exports = { Product, Account, Customer, Profile };
+Account.hasMany(Profile, { onDelete: "CASCADE" });
+Profile.belongsTo(Account, { onDelete: "CASCADE" });
+Customer.hasMany(Profile, { onDelete: "CASCADE" });
+Profile.belongsTo(Customer, { onDelete: "CASCADE" });
+
+Product.hasOne(Accounting, { onDelete: "CASCADE" });
+Accounting.belongsTo(Product, { onDelete: "CASCADE" });
+
+module.exports = { Product, Account, Customer, Profile, Accounting };

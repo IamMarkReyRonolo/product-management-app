@@ -1,4 +1,5 @@
 const models = require("../models");
+const accountingCtrl = require("../controllers/accountingCtrl");
 
 const getSpecificAccount = (req, res, next) => {
 	models.Account.findByPk(req.params.account_id, {
@@ -39,6 +40,13 @@ const addAccount = async (req, res, next) => {
 			date_expires: req.body.date_expires,
 			productId: prod.id,
 		});
+
+		await accountingCtrl.updateAccounting(
+			req,
+			res,
+			next,
+			req.params.product_id
+		);
 
 		res
 			.status(201)
@@ -83,22 +91,20 @@ const addExistingCustomer = async (req, res, next) => {
 	}
 };
 
-const updateAccount = (req, res, next) => {
-	models.Account.update(req.body, {
+const updateAccount = async (req, res, next) => {
+	const updatedAccount = await models.Account.update(req.body, {
 		where: { id: req.params.account_id },
-	})
-		.then((result) => {
-			if (!result) {
-				const error = new Error("Not found");
-				error.status = 404;
-				next(error);
-			}
+	});
 
-			res.status(200).json({ message: "Successfully updated product" });
-		})
-		.catch((err) => {
-			next(err);
-		});
+	if (!updatedAccount) {
+		const error = new Error("Not found");
+		error.status = 404;
+		next(error);
+	}
+
+	await accountingCtrl.updateAccounting(req, res, next, req.params.product_id);
+
+	res.status(200).json({ message: "Successfully updated product" });
 };
 
 const deleteAccount = (req, res, next) => {

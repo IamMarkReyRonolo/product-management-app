@@ -29,11 +29,13 @@ const productAPI = require("./apis/productAPI");
 const accountAPI = require("./apis/accountAPI");
 const customerAPI = require("./apis/customerAPI");
 const profileAPI = require("./apis/profileAPI");
+const accountingAPI = require("./apis/accountingAPI");
 
 app.use("/api/products", productAPI);
 app.use("/api", accountAPI);
 app.use("/api", customerAPI);
 app.use("/api", profileAPI);
+app.use("/api", accountingAPI);
 
 // ERROR HANDLING
 app.use((req, res, next) => {
