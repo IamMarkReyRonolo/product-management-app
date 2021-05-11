@@ -83,9 +83,17 @@ const addIndirectCustomer = async (req, res, next) => {
 };
 
 const updateCustomer = (req, res, next) => {
-	models.Customer.update(req.body, {
-		where: { id: req.params.customer_id },
-	})
+	models.Customer.update(
+		{
+			customer_firstname: req.body.customer_firstname,
+			customer_lastname: req.body.customer_lastname,
+			customer_phone: req.body.customer_phone,
+			customer_email: req.body.customer_email,
+		},
+		{
+			where: { id: req.params.customer_id },
+		}
+	)
 		.then((result) => {
 			if (!result) {
 				const error = new Error("Not found");

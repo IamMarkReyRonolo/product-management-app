@@ -8,10 +8,10 @@ router.get("/customers", customerCtrl.getAllCustomers);
 router.get("/customers/:customer_id", customerCtrl.getSpecificCustomer);
 
 // // POST
-router.post("/customer", customerCtrl.addIndirectCustomer);
-router.post("/:account_id/customer", customerCtrl.addCustomer);
+router.post("/customers/create", customerCtrl.addIndirectCustomer);
+router.post("/:account_id/customers/create", customerCtrl.addCustomer);
 router.post(
-	"/:account_id/customer/:customer_id",
+	"/:account_id/customers/:customer_id",
 	accountCtrl.addExistingCustomer
 );
 
