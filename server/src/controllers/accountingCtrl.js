@@ -1,5 +1,5 @@
 const model = require("../models");
-
+const logCtrl = require("../controllers/logCtrl");
 const getAccounting = async (req, res, next) => {
 	try {
 		const product = await model.Product.findByPk(req.params.product_id, {
@@ -7,12 +7,20 @@ const getAccounting = async (req, res, next) => {
 		});
 
 		if (product) {
+			const accounting = await model.Accounting.findByPk(
+				product.accounting.id,
+				{
+					include: [model.Log],
+				}
+			);
+
 			res.status(200).json({
 				product_id: product.id,
 				product_name: product.product_name,
 				product_image: product.product_image,
 				totalAccounts: product.accounts.length,
 				accounting: product.accounting,
+				logs: accounting.logs,
 			});
 		} else {
 			const error = new Error("Not found");
@@ -24,7 +32,7 @@ const getAccounting = async (req, res, next) => {
 	}
 };
 
-const updateAccounting = async (req, res, next, product_id) => {
+const updateAccounting = async (req, res, next, product_id, message) => {
 	try {
 		const product = await model.Product.findByPk(product_id, {
 			include: [model.Accounting, model.Account],
@@ -40,6 +48,7 @@ const updateAccounting = async (req, res, next, product_id) => {
 
 			let netIncome = income - expense;
 			product.accounting = {
+				id: product.accounting.id,
 				totalExpenses: expense,
 				totalIncome: income,
 				netIncome: netIncome,
@@ -53,6 +62,10 @@ const updateAccounting = async (req, res, next, product_id) => {
 			if (accountingUpdate) {
 				console.log("successfully updated accounting");
 			}
+
+			console.log(product.accounting.id);
+
+			await logCtrl.addLog(message, product.accounting.id, next);
 		} else {
 			const error = new Error("Not found");
 			error.status = 404;

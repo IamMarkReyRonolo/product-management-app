@@ -78,9 +78,6 @@ const deleteProduct = async (req, res, next) => {
 	try {
 		const data = await model.Product.findByPk(req.params.id);
 
-		// await data.removeAccounting();
-		// await data.removeAccounts();
-
 		model.Product.destroy({ where: { id: req.params.id } })
 			.then((result) => {
 				if (!result) {

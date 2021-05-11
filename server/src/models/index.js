@@ -62,6 +62,12 @@ const Accounting = db.define(
 	{ tableName: "accounting" }
 );
 
+const Log = db.define(
+	"log",
+	{ logMessage: DataTypes.STRING },
+	{ tableName: "log" }
+);
+
 Product.hasMany(Account, { onDelete: "CASCADE" });
 Account.belongsTo(Product, { onDelete: "CASCADE" });
 
@@ -76,4 +82,7 @@ Profile.belongsTo(Customer, { onDelete: "CASCADE" });
 Product.hasOne(Accounting, { onDelete: "CASCADE" });
 Accounting.belongsTo(Product, { onDelete: "CASCADE" });
 
-module.exports = { Product, Account, Customer, Profile, Accounting };
+Accounting.hasMany(Log, { onDelete: "CASCADE" });
+Log.belongsTo(Accounting, { onDelete: "CASCADE" });
+
+module.exports = { Product, Account, Customer, Profile, Accounting, Log };

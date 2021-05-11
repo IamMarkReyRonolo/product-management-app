@@ -41,11 +41,14 @@ const addAccount = async (req, res, next) => {
 			productId: prod.id,
 		});
 
+		const message = `Created account "${acc.account_name}". Original price: ${acc.original_price} Selling price: ${acc.selling_price} `;
+
 		await accountingCtrl.updateAccounting(
 			req,
 			res,
 			next,
-			req.params.product_id
+			req.params.product_id,
+			message
 		);
 
 		res
