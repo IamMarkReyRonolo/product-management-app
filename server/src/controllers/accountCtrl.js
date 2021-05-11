@@ -105,7 +105,15 @@ const updateAccount = async (req, res, next) => {
 		next(error);
 	}
 
-	await accountingCtrl.updateAccounting(req, res, next, req.params.product_id);
+	const acc = await models.Account.findByPk(req.params.account_id);
+	const message = `Updated account "${acc.account_name}". Original price: ${acc.original_price} Selling price: ${acc.selling_price} `;
+	await accountingCtrl.updateAccounting(
+		req,
+		res,
+		next,
+		req.params.product_id,
+		message
+	);
 
 	res.status(200).json({ message: "Successfully updated product" });
 };
