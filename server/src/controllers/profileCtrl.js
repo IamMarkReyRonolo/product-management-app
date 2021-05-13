@@ -18,6 +18,25 @@ const updateProfile = (req, res, next) => {
 		});
 };
 
+const deleteProfile = (req, res, next) => {
+	models.Profile.destroy({
+		where: { customerId: req.params.customer_id },
+	})
+		.then((result) => {
+			if (!result) {
+				const error = new Error("Not found");
+				error.status = 404;
+				next(error);
+			}
+
+			res.status(200).json({ message: "Successfully deleted profile" });
+		})
+		.catch((err) => {
+			next(err);
+		});
+};
+
 module.exports = {
 	updateProfile,
+	deleteProfile,
 };

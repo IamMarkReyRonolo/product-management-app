@@ -75,9 +75,9 @@ Account.belongsToMany(Customer, { through: Profile }, { onDelete: "CASCADE" });
 Customer.belongsToMany(Account, { through: Profile }, { onDelete: "CASCADE" });
 
 Account.hasMany(Profile, { onDelete: "CASCADE" });
-Profile.belongsTo(Account, { onDelete: "CASCADE" });
+Profile.belongsTo(Account);
 Customer.hasMany(Profile, { onDelete: "CASCADE" });
-Profile.belongsTo(Customer, { onDelete: "CASCADE" });
+Profile.belongsTo(Customer);
 
 Product.hasOne(Accounting, { onDelete: "CASCADE" });
 Accounting.belongsTo(Product, { onDelete: "CASCADE" });

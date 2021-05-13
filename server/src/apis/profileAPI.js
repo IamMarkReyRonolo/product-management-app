@@ -4,5 +4,5 @@ const router = express.Router();
 
 // UPDATE
 router.patch("/customers/:customer_id/profile", profileCtrl.updateProfile);
-
+router.delete("/customers/:customer_id/profile", profileCtrl.deleteProfile);
 module.exports = router;
