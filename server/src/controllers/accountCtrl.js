@@ -28,7 +28,6 @@ const addAccount = async (req, res, next) => {
 			error.status = 404;
 			next(error);
 		}
-
 		const acc = await models.Account.create({
 			account_name: req.body.account_name,
 			account_type: req.body.account_type,
@@ -41,9 +40,9 @@ const addAccount = async (req, res, next) => {
 			productId: prod.id,
 		});
 
-		const message = `Created account "${acc.account_name}". Original price: ${acc.original_price} Selling price: ${acc.selling_price} `;
+		const message = `Purchased account "${acc.account_name}". Original price: ₱ ${acc.original_price} Selling price: ₱${acc.selling_price} `;
 
-		await accountingCtrl.updateAccounting(
+		await accountingCtrl.updateAccountingAccountCreation(
 			req,
 			res,
 			next,
@@ -107,7 +106,7 @@ const updateAccount = async (req, res, next) => {
 
 	const acc = await models.Account.findByPk(req.params.account_id);
 	const message = `Updated account "${acc.account_name}". Original price: ${acc.original_price} Selling price: ${acc.selling_price} `;
-	await accountingCtrl.updateAccounting(
+	await accountingCtrl.updateAccountingAccountUpdation(
 		req,
 		res,
 		next,
@@ -118,20 +117,47 @@ const updateAccount = async (req, res, next) => {
 	res.status(200).json({ message: "Successfully updated product" });
 };
 
-const deleteAccount = (req, res, next) => {
-	models.Account.destroy({ where: { id: req.params.account_id } })
-		.then((result) => {
-			if (!result) {
-				const error = new Error("Not Found");
-				error.status = 404;
-				next(error);
-			}
+const deleteAccount = async (req, res, next) => {
+	try {
+		const acc = await models.Account.findByPk(req.params.account_id);
+		const account = await models.Account.destroy({
+			where: { id: req.params.account_id },
+		});
+
+		if (!account) {
+			const error = new Error("Not Found");
+			error.status = 404;
+			next(error);
+		} else {
+			const message = `Deleted account "${acc.account_name}". `;
+			console.log(message);
+			await accountingCtrl.updateLogsThroughAccId(
+				req,
+				res,
+				next,
+				req.params.product_id,
+				message
+			);
 
 			res.status(200).json({ message: "Successfully deleted account" });
-		})
-		.catch((err) => {
-			next(err);
-		});
+		}
+	} catch (error) {
+		next(error);
+	}
+
+	// models.Account.destroy({ where: { id: req.params.account_id } })
+	// 	.then((result) => {
+	// 		if (!result) {
+	// 			const error = new Error("Not Found");
+	// 			error.status = 404;
+	// 			next(error);
+	// 		}
+
+	// 		res.status(200).json({ message: "Successfully deleted account" });
+	// 	})
+	// 	.catch((err) => {
+	// 		next(err);
+	// 	});
 };
 
 module.exports = {
