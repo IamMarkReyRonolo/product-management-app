@@ -23,13 +23,12 @@ const deleteProfile = (req, res, next) => {
 		where: { customerId: req.params.customer_id },
 	})
 		.then((result) => {
-			if (!result) {
-				const error = new Error("Not found");
-				error.status = 404;
-				next(error);
+			if (result) {
+				res.status(200).json({ message: "Successfully deleted profile" });
 			}
-
-			res.status(200).json({ message: "Successfully deleted profile" });
+			const error = new Error("Not found");
+			error.status = 404;
+			next(error);
 		})
 		.catch((err) => {
 			next(err);

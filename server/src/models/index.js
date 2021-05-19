@@ -43,7 +43,7 @@ const Customer = db.define(
 const Profile = db.define(
 	"profile",
 	{
-		profile_pin: DataTypes.INTEGER,
+		profile_pin: DataTypes.STRING,
 		subscription_status: DataTypes.STRING,
 		subscription_price: DataTypes.FLOAT,
 		subscription_purchased: DataTypes.DATE,
@@ -68,6 +68,22 @@ const Log = db.define(
 	{ tableName: "log" }
 );
 
+const User = db.define("user", {
+	fullname: {
+		type: DataTypes.STRING,
+		allowNull: false,
+	},
+	username: {
+		type: DataTypes.STRING,
+		unique: true,
+		allowNull: false,
+	},
+	password: {
+		type: DataTypes.STRING,
+		allowNull: false,
+	},
+});
+
 Product.hasMany(Account, { onDelete: "CASCADE" });
 Account.belongsTo(Product, { onDelete: "CASCADE" });
 
@@ -85,4 +101,10 @@ Accounting.belongsTo(Product, { onDelete: "CASCADE" });
 Accounting.hasMany(Log, { onDelete: "CASCADE" });
 Log.belongsTo(Accounting, { onDelete: "CASCADE" });
 
-module.exports = { Product, Account, Customer, Profile, Accounting, Log };
+User.hasMany(Profile);
+Profile.belongsTo(User);
+
+User.hasMany(Customer);
+Customer.belongsTo(User);
+
+module.exports = { Product, Account, Customer, Profile, Accounting, Log, User };

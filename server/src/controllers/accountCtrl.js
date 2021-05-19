@@ -79,6 +79,8 @@ const addExistingCustomer = async (req, res, next) => {
 				profile_pin: req.body.profile_pin,
 				subscription_status: req.body.subscription_status,
 				subscription_price: req.body.subscription_price,
+				subscription_purchased: req.body.subscription_purchased,
+				subscription_expires: req.body.subscription_expires,
 			},
 		});
 
