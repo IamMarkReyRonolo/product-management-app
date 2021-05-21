@@ -101,8 +101,8 @@ Accounting.belongsTo(Product, { onDelete: "CASCADE" });
 Accounting.hasMany(Log, { onDelete: "CASCADE" });
 Log.belongsTo(Accounting, { onDelete: "CASCADE" });
 
-User.hasMany(Profile);
-Profile.belongsTo(User);
+User.hasMany(Product);
+Product.belongsTo(User);
 
 User.hasMany(Customer);
 Customer.belongsTo(User);

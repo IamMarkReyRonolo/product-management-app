@@ -1,6 +1,7 @@
 const express = require("express");
 const productCtrl = require("../controllers/productCtrl");
 const router = express.Router();
+const auth = require("../controllers/auth");
 
 const multer = require("multer");
 const storage = multer.diskStorage({
@@ -24,17 +25,35 @@ const fileFilter = (req, file, callback, next) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 // GET
-router.get("/", productCtrl.getAllProducts);
-router.get("/:id", productCtrl.getSpecificProduct);
+router.get("/:userId/products", auth.authenticate, productCtrl.getAllProducts);
+router.get(
+	"/:userId/products/:id",
+	auth.authenticate,
+	productCtrl.getSpecificProduct
+);
 
 // POST
-router.post("/", upload.single("product_image"), productCtrl.addProduct);
+router.post(
+	"/:userId/products",
+	auth.authenticate,
+	upload.single("product_image"),
+	productCtrl.addProduct
+);
 
 // UPDATE
-router.patch("/:id", upload.single("product_image"), productCtrl.updateProduct);
+router.patch(
+	"/:userId/products/:id",
+	auth.authenticate,
+	upload.single("product_image"),
+	productCtrl.updateProduct
+);
 
 // DELETE
-router.delete("/:id", productCtrl.deleteProduct);
-router.delete("/", productCtrl.deleteAllProduct);
+router.delete(
+	"/:userId/products/:id",
+	auth.authenticate,
+	productCtrl.deleteProduct
+);
+router.delete("/", auth.authenticate, productCtrl.deleteAllProduct);
 
 module.exports = router;

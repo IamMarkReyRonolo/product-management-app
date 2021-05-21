@@ -44,9 +44,9 @@ const accountingAPI = require("./apis/accountingAPI");
 const userAPI = require("./apis/userAPI");
 
 app.use("/api/users", userAPI);
-app.use("/api/products", productAPI);
+app.use("/api/", productAPI);
 app.use("/api", accountAPI);
-app.use("/api", customerAPI);
+app.use("/api/", customerAPI);
 app.use("/api", profileAPI);
 app.use("/api", accountingAPI);
 
@@ -59,7 +59,7 @@ app.use((req, res, next) => {
 
 app.use((error, req, res, next) => {
 	error.status = error.status || 500;
-	res.json({ error_message: error.message });
+	res.status(error.status).json({ error_message: error.message });
 });
 
 // LISTEN

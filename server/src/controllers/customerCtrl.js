@@ -1,37 +1,55 @@
 const models = require("../models");
 
-const getAllCustomers = (req, res, next) => {
-	models.Customer.findAll({ include: [models.Profile] })
-		.then((result) => {
-			if (!result) {
-				const error = new Error("Not found");
-				error.status = 404;
-				next(error);
-			}
+const getAllCustomers = async (req, res, next) => {
+	console.log(req.params.userId);
+	console.log("yeahhhhhhhhhh");
 
-			res.status(200).json({ count: result.length, customers: result });
-		})
-		.catch((err) => {
-			next(err);
+	try {
+		const user = await models.User.findByPk(req.params.userId, {
+			include: { model: models.Customer, include: models.Profile },
 		});
-};
-const getSpecificCustomer = (req, res, next) => {
-	models.Customer.findByPk(req.params.customer_id, {
-		include: [models.Account],
-	})
-		.then((result) => {
-			if (!result) {
-				const error = new Error("Not found");
-				error.status = 404;
-				next(error);
-			}
 
-			res.status(200).json(result);
-		})
-		.catch((err) => {
-			next(err);
-		});
+		res
+			.status(200)
+			.json({ count: user.customers.length, customers: user.customers });
+	} catch (error) {
+		next(error);
+	}
+
+	// models.Customer.findAll({ include: [models.Profile] })
+	// 	.then((result) => {
+	// 		if (!result) {
+	// 			const error = new Error("Not found");
+	// 			error.status = 404;
+	// 			next(error);
+	// 		}
+	// 	})
+	// 	.catch((err) => {
+	// 		next(err);
+	// 	});
 };
+const getSpecificCustomer = async (req, res, next) => {
+	try {
+		const user = await models.User.findByPk(req.params.userId, {
+			include: {
+				model: models.Customer,
+				where: { id: req.params.customer_id },
+				include: models.Account,
+			},
+		});
+
+		if (!user.customers) {
+			const error = new Error("Not found");
+			error.status = 404;
+			next(error);
+		}
+
+		res.status(200).json(user.customers[0]);
+	} catch (error) {
+		next(error);
+	}
+};
+
 const addCustomer = async (req, res, next) => {
 	try {
 		const account = await models.Account.findByPk(req.params.account_id);
@@ -46,6 +64,7 @@ const addCustomer = async (req, res, next) => {
 			customer_lastname: req.body.customer_lastname,
 			customer_phone: req.body.customer_phone,
 			customer_email: req.body.customer_email,
+			userId: req.params.userId,
 		});
 
 		await account.addCustomer(customer, {
@@ -76,6 +95,7 @@ const addIndirectCustomer = async (req, res, next) => {
 			customer_lastname: req.body.customer_lastname,
 			customer_phone: req.body.customer_phone,
 			customer_email: req.body.customer_email,
+			userId: req.params.userId,
 		});
 
 		res.status(201).json({ customer: customer });

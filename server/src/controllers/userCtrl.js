@@ -13,7 +13,7 @@ const signUp = async (req, res, next) => {
 
 		if (exist) {
 			const error = new Error("Email already exists");
-			error.status = 403;
+			error.status = 401;
 			next(error);
 		} else {
 			const user = await models.User.create({
@@ -32,37 +32,54 @@ const signUp = async (req, res, next) => {
 };
 
 const logIn = async (req, res, next) => {
-	console.log(req.body.username);
-	console.log("------------------------------");
-	const exist = await models.User.findOne({
-		where: { username: req.body.username },
-	});
-	console.log("------------------------------");
+	try {
+		const exist = await models.User.findOne({
+			where: { username: req.body.username },
+		});
 
-	if (!exist) {
-		const error = new Error("Email is wrong");
-		error.status = 403;
+		if (!exist) {
+			const error = new Error("Email does not exist");
+			error.status = 400;
+			next(error);
+			console.log("object");
+		}
+
+		const pass = await bcrypt.compare(req.body.password, exist.password);
+		if (!pass) {
+			const error = new Error("Password is wrong");
+			error.status = 400;
+			next(error);
+		}
+
+		const token = await jwt.sign(exist.id, process.env.TOKEN_SECRET);
+		res.header("auth-token", token);
+
+		res.status(200).json({
+			success_message: "You are logged in",
+			user: {
+				id: exist.id,
+				fullname: exist.fullname,
+				token: token,
+			},
+		});
+	} catch (error) {
 		next(error);
 	}
-
-	const pass = await bcrypt.compare(req.body.password, exist.password);
-	if (!pass) {
-		const error = new Error("Password is wrong");
-		error.status = 403;
-		next(error);
-	}
-
-	const token = await jwt.sign(exist.id, process.env.TOKEN_SECRET);
-	res.header("auth-token", token);
-
-	res.status(200).json({
-		success_message: "You are logged in",
-		user: {
-			id: exist.id,
-			fullname: exist.fullname,
-			token: token,
-		},
-	});
 };
 
-module.exports = { logIn, signUp };
+const getUser = async (req, res, next) => {
+	try {
+		const user = await models.User.findByPk(req.user);
+		if (user) {
+			res.status(200).json(user);
+		} else {
+			const error = new Error("User not found");
+			error.status = 404;
+			next(error);
+		}
+	} catch (error) {
+		next(error);
+	}
+};
+
+module.exports = { logIn, signUp, getUser };

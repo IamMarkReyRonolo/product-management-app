@@ -1,9 +1,23 @@
 const models = require("../models");
 const accountingCtrl = require("../controllers/accountingCtrl");
 
-const getSpecificAccount = (req, res, next) => {
-	models.Account.findByPk(req.params.account_id, {
-		where: { productId: req.params.product_id },
+const getSpecificAccount = async (req, res, next) => {
+	console.log("yowsadasd");
+	console.log(req.params.product_id);
+	console.log("yowwwsdasd");
+
+	const product = await models.Product.findOne({
+		where: { id: req.params.product_id, userId: req.params.userId },
+	});
+
+	if (!product) {
+		const error = new Error("Not found");
+		error.status = 404;
+		next(error);
+	}
+
+	models.Account.findOne({
+		where: { productId: req.params.product_id, id: req.params.account_id },
 		include: [models.Product, models.Customer],
 	})
 		.then((result) => {
@@ -22,6 +36,9 @@ const getSpecificAccount = (req, res, next) => {
 
 const addAccount = async (req, res, next) => {
 	try {
+		console.log("yey");
+		console.log(req.params.product_id);
+		console.log("yow");
 		const prod = await models.Product.findByPk(req.params.product_id);
 		if (!prod) {
 			const error = new Error("Product not found. Cannot add account");

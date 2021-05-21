@@ -1,31 +1,56 @@
 const model = require("../models");
 
-const getAllProducts = (req, res, next) => {
-	model.Product.findAll()
-		.then((result) => {
-			if (!result) {
-				const error = new Error("Product not found");
-				error.status = 404;
-				next(error);
-			}
-			res.status(200).json({ count: result.length, products: { result } });
-		})
-		.catch((err) => {
-			next(err);
+const getAllProducts = async (req, res, next) => {
+	console.log("------");
+	console.log(req.params.userId);
+	console.log(req.params.id);
+	console.log("------");
+	try {
+		console.log(req.params.userId);
+		const user = await model.User.findByPk(req.params.userId, {
+			include: model.Product,
 		});
+
+		res
+			.status(200)
+			.json({ count: user.products.length, products: user.products });
+	} catch (error) {
+		next(error);
+	}
 };
 
 const getSpecificProduct = async (req, res, next) => {
 	try {
-		const product = await model.Product.findByPk(req.params.id, {
-			include: model.Account,
+		const user = await model.User.findByPk(req.params.userId, {
+			include: {
+				model: model.Product,
+				where: {
+					id: req.params.id,
+				},
+				include: model.Account,
+			},
 		});
-		if (!product) {
+
+		console.log("yeah");
+		console.log(user);
+		console.log("yeah");
+
+		if (!user.products) {
 			const error = new Error("Not found");
 			error.status = 404;
 			next(error);
 		}
-		res.status(200).json(product);
+
+		res.status(200).json(user.products);
+		// const product = await model.Product.findByPk(req.params.id, {
+		// 	include: model.Account,
+		// });
+		// if (!product) {
+		// 	const error = new Error("Not found");
+		// 	error.status = 404;
+		// 	next(error);
+		// }
+		// res.status(200).json(product);
 	} catch (error) {
 		next(error);
 	}
@@ -33,9 +58,17 @@ const getSpecificProduct = async (req, res, next) => {
 
 const addProduct = async (req, res, next) => {
 	try {
+		const user = await model.User.findByPk(req.params.userId);
+		if (!user) {
+			const error = new Error("Not found");
+			error.status = 404;
+			next(error);
+		}
+
 		const product = await model.Product.create({
 			product_name: req.body.product_name,
 			product_image: req.file.path,
+			userId: user.id,
 		});
 
 		const accounting = await model.Accounting.create({
@@ -76,6 +109,8 @@ const updateProduct = (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
 	try {
+		console.log(req.params.userId);
+		console.log(req.params.id);
 		const data = await model.Product.findByPk(req.params.id);
 
 		model.Product.destroy({ where: { id: req.params.id } })
