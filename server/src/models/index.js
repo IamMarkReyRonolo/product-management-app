@@ -23,7 +23,6 @@ const Account = db.define(
 		account_username: DataTypes.STRING,
 		account_password: DataTypes.STRING,
 		original_price: DataTypes.FLOAT,
-		selling_price: DataTypes.FLOAT,
 		date_purchased: DataTypes.DATE,
 		date_expires: DataTypes.DATE,
 	},

@@ -1,4 +1,5 @@
 const models = require("../models");
+const accountingCtrl = require("../controllers/accountingCtrl");
 
 const getAllCustomers = async (req, res, next) => {
 	console.log(req.params.userId);
@@ -76,6 +77,21 @@ const addCustomer = async (req, res, next) => {
 				subscription_expires: req.body.subscription_expires,
 			},
 		});
+
+		const message = `${req.body.customer_firstname} ${
+			req.body.customer_lastname
+		} subscribed to account "${account.account_name}" at ₱"${
+			req.body.subscription_price
+		}" on ${req.body.subscription_purchased.toString().substr(0, 10)}`;
+
+		await accountingCtrl.updateAccountingProfileSubscription(
+			req,
+			res,
+			next,
+			account.productId,
+			req.body.subscription_price,
+			message
+		);
 
 		const result = await models.Account.findOne({
 			where: { id: req.params.account_id },

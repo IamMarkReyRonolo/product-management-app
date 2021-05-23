@@ -51,13 +51,14 @@ const addAccount = async (req, res, next) => {
 			account_username: req.body.account_username,
 			account_password: req.body.account_password,
 			original_price: req.body.original_price,
-			selling_price: req.body.selling_price,
 			date_purchased: req.body.date_purchased,
 			date_expires: req.body.date_expires,
 			productId: prod.id,
 		});
 
-		const message = `Purchased account "${acc.account_name}". Original price: ₱ ${acc.original_price} Selling price: ₱${acc.selling_price} `;
+		const message = `Purchased account "${acc.account_name}" at ₱ ${
+			acc.original_price
+		} on ${req.body.date_purchased.toString().substr(0, 10)}`;
 
 		await accountingCtrl.updateAccountingAccountCreation(
 			req,
@@ -100,6 +101,25 @@ const addExistingCustomer = async (req, res, next) => {
 				subscription_expires: req.body.subscription_expires,
 			},
 		});
+		console.log("yow");
+		console.log(account);
+		console.log("yow");
+		console.log(account.profiles);
+		console.log("---");
+		const message = `${customer.customer_firstname} ${
+			customer.customer_lastname
+		} subscribed to account "${account.account_name}" at ₱"${
+			req.body.subscription_price
+		}" on ${req.body.subscription_purchased.toString().substr(0, 10)}`;
+
+		await accountingCtrl.updateAccountingProfileSubscription(
+			req,
+			res,
+			next,
+			account.productId,
+			req.body.subscription_price,
+			message
+		);
 
 		const result = await models.Account.findOne({
 			where: { id: req.params.account_id },
@@ -124,7 +144,7 @@ const updateAccount = async (req, res, next) => {
 	}
 
 	const acc = await models.Account.findByPk(req.params.account_id);
-	const message = `Updated account "${acc.account_name}". Original price: ${acc.original_price} Selling price: ${acc.selling_price} `;
+	const message = `Updated account "${acc.account_name}". Price: ${acc.original_price} `;
 	await accountingCtrl.updateAccountingAccountUpdation(
 		req,
 		res,
