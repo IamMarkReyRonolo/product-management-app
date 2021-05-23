@@ -2,9 +2,6 @@ const models = require("../models");
 const accountingCtrl = require("../controllers/accountingCtrl");
 
 const getAllCustomers = async (req, res, next) => {
-	console.log(req.params.userId);
-	console.log("yeahhhhhhhhhh");
-
 	try {
 		const user = await models.User.findByPk(req.params.userId, {
 			include: { model: models.Customer, include: models.Profile },

@@ -6,7 +6,6 @@ const authenticate = (req, res, next) => {
 	const token = header.split(" ")[1];
 
 	if (token.toString() === "null") {
-		console.log("yow");
 		const error = new Error("Access Denied");
 		error.status = 401;
 		next(error);

@@ -1,12 +1,7 @@
 const model = require("../models");
 
 const getAllProducts = async (req, res, next) => {
-	console.log("------");
-	console.log(req.params.userId);
-	console.log(req.params.id);
-	console.log("------");
 	try {
-		console.log(req.params.userId);
 		const user = await model.User.findByPk(req.params.userId, {
 			include: model.Product,
 		});
@@ -30,10 +25,6 @@ const getSpecificProduct = async (req, res, next) => {
 				include: model.Account,
 			},
 		});
-
-		console.log("yeah");
-		console.log(user);
-		console.log("yeah");
 
 		if (!user.products) {
 			const error = new Error("Not found");
@@ -93,7 +84,6 @@ const updateProduct = (req, res, next) => {
 		{ where: { id: req.params.id } }
 	)
 		.then((result) => {
-			console.log(result);
 			if (!result) {
 				const error = new Error("Not Found");
 				error.status = 404;
@@ -109,8 +99,6 @@ const updateProduct = (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
 	try {
-		console.log(req.params.userId);
-		console.log(req.params.id);
 		const data = await model.Product.findByPk(req.params.id);
 
 		model.Product.destroy({ where: { id: req.params.id } })

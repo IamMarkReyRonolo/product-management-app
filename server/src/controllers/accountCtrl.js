@@ -2,10 +2,6 @@ const models = require("../models");
 const accountingCtrl = require("../controllers/accountingCtrl");
 
 const getSpecificAccount = async (req, res, next) => {
-	console.log("yowsadasd");
-	console.log(req.params.product_id);
-	console.log("yowwwsdasd");
-
 	const product = await models.Product.findOne({
 		where: { id: req.params.product_id, userId: req.params.userId },
 	});
@@ -36,9 +32,6 @@ const getSpecificAccount = async (req, res, next) => {
 
 const addAccount = async (req, res, next) => {
 	try {
-		console.log("yey");
-		console.log(req.params.product_id);
-		console.log("yow");
 		const prod = await models.Product.findByPk(req.params.product_id);
 		if (!prod) {
 			const error = new Error("Product not found. Cannot add account");
@@ -101,11 +94,7 @@ const addExistingCustomer = async (req, res, next) => {
 				subscription_expires: req.body.subscription_expires,
 			},
 		});
-		console.log("yow");
-		console.log(account);
-		console.log("yow");
-		console.log(account.profiles);
-		console.log("---");
+
 		const message = `${customer.customer_firstname} ${
 			customer.customer_lastname
 		} subscribed to account "${account.account_name}" at ₱"${
@@ -169,7 +158,7 @@ const deleteAccount = async (req, res, next) => {
 			next(error);
 		} else {
 			const message = `Deleted account "${acc.account_name}". `;
-			console.log(message);
+
 			await accountingCtrl.updateLogsThroughAccId(
 				req,
 				res,

@@ -41,7 +41,6 @@ const logIn = async (req, res, next) => {
 			const error = new Error("Email does not exist");
 			error.status = 400;
 			next(error);
-			console.log("object");
 		}
 
 		const pass = await bcrypt.compare(req.body.password, exist.password);

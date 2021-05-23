@@ -28,9 +28,6 @@ const updateProfile = async (req, res, next) => {
 
 			const message = `Updated ${prof.customer.customer_firstname} ${prof.customer.customer_lastname}'s subscription to account "${prof.account.account_name}" at ₱"${req.body.subscription_price}"`;
 
-			console.log("asdasd");
-			console.log(message);
-			console.log("asdasd");
 			await accountingCtrl.updateAccountingProfileUpdation(
 				req,
 				res,
@@ -57,11 +54,6 @@ const deleteProfile = async (req, res, next) => {
 		},
 	});
 
-	console.log("qqqqqqqqqq");
-
-	console.log(account);
-	console.log("qqqqqqqqqq");
-
 	models.Profile.destroy({
 		where: {
 			customerId: req.params.customer_id,
@@ -71,7 +63,7 @@ const deleteProfile = async (req, res, next) => {
 		.then(async (result) => {
 			if (result) {
 				const message = `Deleted profile in "${account.account_name}" owned by ${account.profiles[0].customer.customer_firstname} ${account.profiles[0].customer.customer_lastname}. `;
-				console.log(message);
+
 				await accountingCtrl.updateLogsThroughAccId(
 					req,
 					res,

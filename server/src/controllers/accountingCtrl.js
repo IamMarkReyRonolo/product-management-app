@@ -47,9 +47,7 @@ const updateAccountingAccountUpdation = async (
 		if (product) {
 			let expense = 0;
 			let income = product.accounting.totalIncome;
-			console.log("asdasd");
-			console.log(income);
-			console.log("sadsd");
+
 			product.accounts.forEach((account) => {
 				expense += account.original_price;
 			});
@@ -70,8 +68,6 @@ const updateAccountingAccountUpdation = async (
 			if (accountingUpdate) {
 				console.log("successfully updated accounting");
 			}
-
-			console.log(product.accounting.id);
 
 			await logCtrl.addLog(message, product.accounting.id, next);
 		} else {
@@ -147,18 +143,13 @@ const updateAccountingProfileSubscription = async (
 			include: [model.Accounting, model.Account],
 		});
 
-		console.log("------------");
 		if (product) {
 			const accounting = await model.Accounting.findOne({
 				where: { productId: product_id },
 			});
 
-			console.log(accounting.totalExpenses);
-			console.log("-------------------");
-
 			let expense = accounting.totalExpenses;
 			let income = accounting.totalIncome + parseInt(subscriptionPrice);
-			console.log("income " + income + " " + accounting.totalIncome);
 
 			let netIncome = income - expense;
 			product.accounting = {
@@ -198,9 +189,6 @@ const updateAccountingProfileUpdation = async (
 	message
 ) => {
 	try {
-		console.log("object");
-		console.log(message);
-		console.log("object");
 		const product = await model.Product.findByPk(product_id, {
 			include: [
 				{ model: model.Accounting },
@@ -214,9 +202,6 @@ const updateAccountingProfileUpdation = async (
 				product.accounting.totalIncome -
 				parseInt(oldPrice) +
 				parseInt(newPrice);
-			console.log("asdasd");
-			console.log(income);
-			console.log("sadsd");
 
 			let netIncome = income - expense;
 			product.accounting = {
@@ -234,8 +219,6 @@ const updateAccountingProfileUpdation = async (
 			if (accountingUpdate) {
 				console.log("successfully updated accounting");
 			}
-
-			console.log(product.accounting.id);
 
 			await logCtrl.addLog(message, product.accounting.id, next);
 		} else {
