@@ -6,7 +6,7 @@ const auth = require("../controllers/auth");
 const multer = require("multer");
 const storage = multer.diskStorage({
 	destination: (req, file, callback) => {
-		callback(null, "/src/uploads");
+		callback(null, "/app/src/uploads");
 	},
 	filename: (req, file, callback) => {
 		callback(null, Date.now() + file.originalname);
