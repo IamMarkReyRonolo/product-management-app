@@ -7,7 +7,7 @@ const auth = require("./controllers/auth");
 const app = express();
 
 // MIDDLEWARES
-app.use("/src/uploads", express.static("src/uploads"));
+app.use("/src/uploads", express.static("/src/uploads"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
