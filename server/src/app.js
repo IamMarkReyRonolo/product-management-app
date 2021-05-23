@@ -3,6 +3,7 @@ const cors = require("cors");
 const db = require("./utils/dbConnection");
 const models = require("./models");
 const auth = require("./controllers/auth");
+const path = require("path");
 
 const app = express();
 
