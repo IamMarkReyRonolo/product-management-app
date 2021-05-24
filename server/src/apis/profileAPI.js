@@ -9,6 +9,7 @@ router.patch(
 	auth.authenticate,
 	profileCtrl.updateProfile
 );
+
 router.delete(
 	"/:accountId/customers/:customer_id/profile",
 	auth.authenticate,
