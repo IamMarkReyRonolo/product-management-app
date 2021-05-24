@@ -22,10 +22,7 @@ const getSpecificProduct = async (req, res, next) => {
 				where: {
 					id: req.params.id,
 				},
-				include: {
-					model: model.Account,
-					include: model.Profile,
-				},
+				include: model.Account,
 			},
 		});
 
