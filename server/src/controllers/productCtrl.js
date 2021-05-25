@@ -83,9 +83,14 @@ const addProduct = async (req, res, next) => {
 	}
 };
 
-const updateProduct = (req, res, next) => {
+const updateProduct = async (req, res, next) => {
+	const uploadRes = await fileUp.cloudinary.uploader.upload(
+		req.body.product_image,
+		{ upload_preset: "product-management" }
+	);
+
 	model.Product.update(
-		{ product_name: req.body.product_name, product_image: req.file.path },
+		{ product_name: req.body.product_name, product_image: uploadRes.url },
 		{ where: { id: req.params.id } }
 	)
 		.then((result) => {
