@@ -1,4 +1,5 @@
 const model = require("../models");
+const fileUp = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res, next) => {
 	try {
@@ -56,9 +57,13 @@ const addProduct = async (req, res, next) => {
 			next(error);
 		}
 
+		const uploadRes = await fileUp.cloudinary.uploader.upload(
+			req.body.product_image,
+			{ upload_preset: "product-management" }
+		);
 		const product = await model.Product.create({
 			product_name: req.body.product_name,
-			product_image: req.file.path,
+			product_image: uploadRes.url,
 			userId: user.id,
 		});
 
