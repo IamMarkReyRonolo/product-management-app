@@ -1,30 +1,26 @@
 const models = require("../models");
 const accountingCtrl = require("../controllers/accountingCtrl");
+const nodeCache = require("../utils/nodeCache");
 
 const getAllCustomers = async (req, res, next) => {
 	try {
-		const user = await models.User.findByPk(req.params.userId, {
-			include: { model: models.Customer, include: models.Profile },
-		});
+		const customerCacheKey = `${req.params.userId}/customers`;
+		const cachedData = nodeCache.get(req, res, next, customerCacheKey);
+		if (cachedData) {
+			res.status(200).json(cachedData);
+		} else {
+			const user = await models.User.findByPk(req.params.userId, {
+				include: { model: models.Customer, include: models.Profile },
+			});
 
-		res
-			.status(200)
-			.json({ count: user.customers.length, customers: user.customers });
+			const data = { count: user.customers.length, customers: user.customers };
+			nodeCache.set(req, data, next, customerCacheKey);
+
+			res.status(200).json(data);
+		}
 	} catch (error) {
 		next(error);
 	}
-
-	// models.Customer.findAll({ include: [models.Profile] })
-	// 	.then((result) => {
-	// 		if (!result) {
-	// 			const error = new Error("Not found");
-	// 			error.status = 404;
-	// 			next(error);
-	// 		}
-	// 	})
-	// 	.catch((err) => {
-	// 		next(err);
-	// 	});
 };
 const getSpecificCustomer = async (req, res, next) => {
 	try {
@@ -95,6 +91,11 @@ const addCustomer = async (req, res, next) => {
 			include: models.Customer,
 		});
 
+		const accountingCacheKey = `${req.params.userId}/${req.params.productId}/accounting`;
+		const productCacheKey2 = `${req.params.userId}/customers`;
+		nodeCache.clear(req, res, next, accountingCacheKey);
+		nodeCache.clear(req, res, next, productCacheKey2);
+
 		res.status(201).json({ account: result });
 	} catch (error) {
 		next(error);
@@ -110,6 +111,9 @@ const addIndirectCustomer = async (req, res, next) => {
 			customer_email: req.body.customer_email,
 			userId: req.params.userId,
 		});
+
+		const customerCacheKey = `${req.params.userId}/customers`;
+		nodeCache.clear(req, res, next, customerCacheKey);
 
 		res.status(201).json({ customer: customer });
 	} catch (error) {
@@ -136,6 +140,9 @@ const updateCustomer = (req, res, next) => {
 				next(error);
 			}
 
+			const customerCacheKey = `${req.params.userId}/customers`;
+			nodeCache.clear(req, res, next, customerCacheKey);
+
 			res.status(200).json({ message: "Successfully updated customer" });
 		})
 		.catch((err) => {
@@ -151,6 +158,9 @@ const deleteCustomer = async (req, res, next) => {
 				error.status = 404;
 				next(error);
 			}
+
+			const customerCacheKey = `${req.params.userId}/customers`;
+			nodeCache.clear(req, res, next, customerCacheKey);
 			res.status(200).json({ message: "Successfully deleted customer" });
 		})
 		.catch((err) => {

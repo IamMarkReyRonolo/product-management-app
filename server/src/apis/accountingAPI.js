@@ -4,7 +4,7 @@ const router = express.Router();
 const auth = require("../controllers/auth");
 
 router.get(
-	"/:product_id/accounting",
+	"/:userId/:product_id/accounting",
 	auth.authenticate,
 	accountingCtrl.getAccounting
 );

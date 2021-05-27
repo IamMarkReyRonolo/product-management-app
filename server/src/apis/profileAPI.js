@@ -5,13 +5,12 @@ const auth = require("../controllers/auth");
 
 // UPDATE
 router.patch(
-	"/:accountId/customers/:customer_id/profile",
+	"/:userId/:productId/:accountId/customers/:customer_id/profile",
 	auth.authenticate,
 	profileCtrl.updateProfile
 );
-
 router.delete(
-	"/:accountId/customers/:customer_id/profile",
+	"/:userId/:productId/:accountId/customers/:customer_id/profile",
 	auth.authenticate,
 	profileCtrl.deleteProfile
 );

@@ -1,6 +1,7 @@
 const models = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodeCache = require("../utils/nodeCache");
 
 const signUp = async (req, res, next) => {
 	try {
@@ -68,13 +69,20 @@ const logIn = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
 	try {
-		const user = await models.User.findByPk(req.user);
-		if (user) {
-			res.status(200).json(user);
+		const userCacheKey = `users/${req.params.token}`;
+		const cachedData = nodeCache.get(req, res, next, userCacheKey);
+		if (cachedData) {
+			res.status(200).json(cachedData);
 		} else {
-			const error = new Error("User not found");
-			error.status = 404;
-			next(error);
+			const user = await models.User.findByPk(req.user);
+			if (user) {
+				nodeCache.set(req, user, next, userCacheKey);
+				res.status(200).json(user);
+			} else {
+				const error = new Error("User not found");
+				error.status = 404;
+				next(error);
+			}
 		}
 	} catch (error) {
 		next(error);

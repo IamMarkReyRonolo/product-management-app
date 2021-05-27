@@ -23,12 +23,12 @@ router.post(
 	customerCtrl.addIndirectCustomer
 );
 router.post(
-	"/:userId/:account_id/customers/create",
+	"/:userId/:productId/:account_id/customers/create",
 	auth.authenticate,
 	customerCtrl.addCustomer
 );
 router.post(
-	"/:userId/:account_id/customers/:customer_id",
+	"/:userId/:productId/:account_id/customers/:customer_id",
 	auth.authenticate,
 	accountCtrl.addExistingCustomer
 );

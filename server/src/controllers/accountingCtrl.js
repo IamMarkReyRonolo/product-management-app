@@ -1,31 +1,43 @@
 const model = require("../models");
 const logCtrl = require("../controllers/logCtrl");
+const nodeCache = require("../utils/nodeCache");
+
 const getAccounting = async (req, res, next) => {
 	try {
-		const product = await model.Product.findByPk(req.params.product_id, {
-			include: [model.Accounting, model.Account],
-		});
-
-		if (product) {
-			const accounting = await model.Accounting.findByPk(
-				product.accounting.id,
-				{
-					include: [model.Log],
-				}
-			);
-
-			res.status(200).json({
-				product_id: product.id,
-				product_name: product.product_name,
-				product_image: product.product_image,
-				totalAccounts: product.accounts.length,
-				accounting: product.accounting,
-				logs: accounting.logs,
-			});
+		const accountingCacheKey = `${req.params.userId}/${req.params.product_id}/accounting`;
+		const cachedData = nodeCache.get(req, res, next, accountingCacheKey);
+		if (cachedData) {
+			res.status(200).json(cachedData);
 		} else {
-			const error = new Error("Not found");
-			error.status = 404;
-			next(error);
+			const product = await model.Product.findByPk(req.params.product_id, {
+				include: [model.Accounting, model.Account],
+			});
+
+			if (product) {
+				const accounting = await model.Accounting.findByPk(
+					product.accounting.id,
+					{
+						include: [model.Log],
+					}
+				);
+
+				const data = {
+					product_id: product.id,
+					product_name: product.product_name,
+					product_image: product.product_image,
+					totalAccounts: product.accounts.length,
+					accounting: product.accounting,
+					logs: accounting.logs,
+				};
+
+				nodeCache.set(req, data, next, accountingCacheKey);
+
+				res.status(200).json(data);
+			} else {
+				const error = new Error("Not found");
+				error.status = 404;
+				next(error);
+			}
 		}
 	} catch (error) {
 		next(error);

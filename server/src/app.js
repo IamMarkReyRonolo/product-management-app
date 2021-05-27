@@ -3,16 +3,16 @@ const cors = require("cors");
 const db = require("./utils/dbConnection");
 const models = require("./models");
 const auth = require("./controllers/auth");
-const path = require("path");
+const morgan = require("morgan");
 
 const app = express();
 
 // MIDDLEWARES
-app.use(express.static("/app/src/uploads"));
 app.use(cors());
+app.use(morgan("tiny"));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
 // DB CONNECTION
 
 db.authenticate()

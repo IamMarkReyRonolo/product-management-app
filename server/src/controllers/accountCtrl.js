@@ -1,5 +1,6 @@
 const models = require("../models");
 const accountingCtrl = require("../controllers/accountingCtrl");
+const nodeCache = require("../utils/nodeCache");
 
 const getSpecificAccount = async (req, res, next) => {
 	const product = await models.Product.findOne({
@@ -61,6 +62,11 @@ const addAccount = async (req, res, next) => {
 			message
 		);
 
+		const accountingCacheKey = `${req.params.userId}/${req.params.product_id}/accounting`;
+		const specificProductCacheKey = `${req.params.userId}/products/${req.params.product_id}`;
+		nodeCache.clear(req, res, next, accountingCacheKey);
+		nodeCache.clear(req, res, next, specificProductCacheKey);
+
 		res
 			.status(201)
 			.json({ message: "Successfully created account", account: acc });
@@ -115,6 +121,11 @@ const addExistingCustomer = async (req, res, next) => {
 			include: models.Customer,
 		});
 
+		const accountingCacheKey = `${req.params.userId}/${req.params.productId}/accounting`;
+		const productCacheKey2 = `${req.params.userId}/customers`;
+		nodeCache.clear(req, res, next, accountingCacheKey);
+		nodeCache.clear(req, res, next, productCacheKey2);
+
 		res.status(201).json({ account: result });
 	} catch (error) {
 		next(error);
@@ -142,6 +153,13 @@ const updateAccount = async (req, res, next) => {
 		message
 	);
 
+	const accountingCacheKey = `${req.params.userId}/${req.params.product_id}/accounting`;
+	const specificProductCacheKey = `${req.params.userId}/products/${req.params.product_id}`;
+	const productCacheKey2 = `${req.params.userId}/customers`;
+	nodeCache.clear(req, res, next, accountingCacheKey);
+	nodeCache.clear(req, res, next, specificProductCacheKey);
+	nodeCache.clear(req, res, next, productCacheKey2);
+
 	res.status(200).json({ message: "Successfully updated product" });
 };
 
@@ -167,25 +185,18 @@ const deleteAccount = async (req, res, next) => {
 				message
 			);
 
+			const accountingCacheKey = `${req.params.userId}/${req.params.product_id}/accounting`;
+			const specificProductCacheKey = `${req.params.userId}/products/${req.params.product_id}`;
+			const productCacheKey2 = `${req.params.userId}/customers`;
+			nodeCache.clear(req, res, next, accountingCacheKey);
+			nodeCache.clear(req, res, next, specificProductCacheKey);
+			nodeCache.clear(req, res, next, productCacheKey2);
+
 			res.status(200).json({ message: "Successfully deleted account" });
 		}
 	} catch (error) {
 		next(error);
 	}
-
-	// models.Account.destroy({ where: { id: req.params.account_id } })
-	// 	.then((result) => {
-	// 		if (!result) {
-	// 			const error = new Error("Not Found");
-	// 			error.status = 404;
-	// 			next(error);
-	// 		}
-
-	// 		res.status(200).json({ message: "Successfully deleted account" });
-	// 	})
-	// 	.catch((err) => {
-	// 		next(err);
-	// 	});
 };
 
 module.exports = {

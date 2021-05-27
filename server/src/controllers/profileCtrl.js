@@ -1,4 +1,5 @@
 const models = require("../models");
+const nodeCache = require("../utils/nodeCache");
 
 const accountingCtrl = require("../controllers/accountingCtrl");
 
@@ -38,6 +39,10 @@ const updateProfile = async (req, res, next) => {
 				message
 			);
 
+			const accountingCacheKey = `${req.params.userId}/${req.params.productId}/accounting`;
+			const productCacheKey2 = `${req.params.userId}/customers`;
+			nodeCache.clear(req, res, next, accountingCacheKey);
+			nodeCache.clear(req, res, next, productCacheKey2);
 			res.status(200).json({ message: "Successfully updated profile" });
 		})
 		.catch((err) => {
@@ -71,6 +76,11 @@ const deleteProfile = async (req, res, next) => {
 					account.productId,
 					message
 				);
+
+				const accountingCacheKey = `${req.params.userId}/${req.params.productId}/accounting`;
+				const productCacheKey2 = `${req.params.userId}/customers`;
+				nodeCache.clear(req, res, next, accountingCacheKey);
+				nodeCache.clear(req, res, next, productCacheKey2);
 
 				res.status(200).json({ message: "Successfully deleted profile" });
 			}

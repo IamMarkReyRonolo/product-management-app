@@ -1,15 +1,23 @@
 const model = require("../models");
 const fileUp = require("../utils/cloudinary");
+const nodeCache = require("../utils/nodeCache");
 
 const getAllProducts = async (req, res, next) => {
 	try {
-		const user = await model.User.findByPk(req.params.userId, {
-			include: model.Product,
-		});
+		const productCacheKey = `${req.params.userId}/products`;
+		const cachedData = nodeCache.get(req, res, next, productCacheKey);
+		if (cachedData) {
+			res.status(200).json(cachedData);
+		} else {
+			const user = await model.User.findByPk(req.params.userId, {
+				include: model.Product,
+			});
+			const data = { count: user.products.length, products: user.products };
 
-		res
-			.status(200)
-			.json({ count: user.products.length, products: user.products });
+			nodeCache.set(req, data, next, productCacheKey);
+
+			res.status(200).json(data);
+		}
 	} catch (error) {
 		next(error);
 	}
@@ -17,32 +25,31 @@ const getAllProducts = async (req, res, next) => {
 
 const getSpecificProduct = async (req, res, next) => {
 	try {
-		const user = await model.User.findByPk(req.params.userId, {
-			include: {
-				model: model.Product,
-				where: {
-					id: req.params.id,
+		const specificProductCacheKey = `${req.params.userId}/products/${req.params.productId}`;
+		const cachedData = nodeCache.get(req, res, next, specificProductCacheKey);
+		if (cachedData) {
+			res.status(200).json(cachedData);
+		} else {
+			const user = await model.User.findByPk(req.params.userId, {
+				include: {
+					model: model.Product,
+					where: {
+						id: req.params.productId,
+					},
+					include: model.Account,
 				},
-				include: model.Account,
-			},
-		});
+			});
 
-		if (!user.products) {
-			const error = new Error("Not found");
-			error.status = 404;
-			next(error);
+			if (!user.products) {
+				const error = new Error("Not found");
+				error.status = 404;
+				next(error);
+			}
+			const data = user.products;
+			nodeCache.set(req, data, next, specificProductCacheKey);
+
+			res.status(200).json(data);
 		}
-
-		res.status(200).json(user.products);
-		// const product = await model.Product.findByPk(req.params.id, {
-		// 	include: model.Account,
-		// });
-		// if (!product) {
-		// 	const error = new Error("Not found");
-		// 	error.status = 404;
-		// 	next(error);
-		// }
-		// res.status(200).json(product);
 	} catch (error) {
 		next(error);
 	}
@@ -61,6 +68,7 @@ const addProduct = async (req, res, next) => {
 			req.body.product_image,
 			{ upload_preset: "product-management" }
 		);
+
 		const product = await model.Product.create({
 			product_name: req.body.product_name,
 			product_image: uploadRes.url,
@@ -73,6 +81,9 @@ const addProduct = async (req, res, next) => {
 			netIncome: 0,
 			productId: product.id,
 		});
+
+		const productCacheKey = `${req.params.userId}/products`;
+		nodeCache.clear(req, res, next, productCacheKey);
 
 		res.status(201).json({
 			message: "Successfully created product",
@@ -91,7 +102,7 @@ const updateProduct = async (req, res, next) => {
 
 	model.Product.update(
 		{ product_name: req.body.product_name, product_image: uploadRes.url },
-		{ where: { id: req.params.id } }
+		{ where: { id: req.params.productId } }
 	)
 		.then((result) => {
 			if (!result) {
@@ -99,6 +110,11 @@ const updateProduct = async (req, res, next) => {
 				error.status = 404;
 				next(error);
 			}
+
+			const productCacheKey = `${req.params.userId}/products`;
+			nodeCache.clear(req, res, next, productCacheKey);
+			const specificProductCacheKey = `${req.params.userId}/products/${req.params.productId}`;
+			nodeCache.clear(req, res, next, specificProductCacheKey);
 
 			res.status(200).json({ message: "Successfully updated product" });
 		})
@@ -109,9 +125,7 @@ const updateProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
 	try {
-		const data = await model.Product.findByPk(req.params.id);
-
-		model.Product.destroy({ where: { id: req.params.id } })
+		model.Product.destroy({ where: { id: req.params.productId } })
 			.then((result) => {
 				if (!result) {
 					const error = new Error("Not Found");
@@ -119,18 +133,14 @@ const deleteProduct = async (req, res, next) => {
 					next(error);
 				}
 
+				const productCacheKey = `${req.params.userId}/products`;
+				nodeCache.clear(req, res, next, productCacheKey);
+				const productCacheKey2 = `${req.params.userId}/customers`;
+				nodeCache.clear(req, res, next, productCacheKey2);
+				const productCacheKey3 = `${req.params.userId}/${req.params.productId}/accounting`;
+				nodeCache.clear(req, res, next, productCacheKey3);
+
 				res.status(200).json({ message: "Successfully deleted product" });
-
-				const fs = require("fs");
-
-				const path = data.product_image;
-
-				fs.unlink(path, (err) => {
-					if (err) {
-						console.error(err);
-						return;
-					}
-				});
 			})
 			.catch((err) => {
 				next(err);

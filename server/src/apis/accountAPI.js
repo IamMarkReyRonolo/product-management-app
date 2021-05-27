@@ -11,18 +11,22 @@ router.get(
 );
 
 // POST
-router.post("/:product_id/accounts", auth.authenticate, accountCtrl.addAccount);
+router.post(
+	"/:userId/:product_id/accounts",
+	auth.authenticate,
+	accountCtrl.addAccount
+);
 
 // UPDATE
 router.patch(
-	"/:product_id/accounts/:account_id",
+	"/:userId/:product_id/accounts/:account_id",
 	auth.authenticate,
 	accountCtrl.updateAccount
 );
 
 // DELETE
 router.delete(
-	"/:product_id/accounts/:account_id",
+	"/:userId/:product_id/accounts/:account_id",
 	auth.authenticate,
 	accountCtrl.deleteAccount
 );
